@@ -225,50 +225,90 @@
   }
 
   /* Starting Page */
-  #start-page {
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(20, 29, 55, 0.95);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    visibility: hidden;
-    opacity: 0;
-    transition: opacity 0.4s ease;
-    z-index: 900;
-    font-family: 'Montserrat', sans-serif;
-  }
-  #start-page.visible {
-    visibility: visible;
-    opacity: 1;
-  }
+#start-page {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(20, 29, 55, 0.95);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  z-index: 900;
+  font-family: 'Montserrat', sans-serif;
+  padding: 2rem;
+  text-align: center;
+}
+
+/* When visible */
+#start-page.visible {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* Title styling */
+#start-page h1 {
+  color: #62a0ff;
+  font-weight: 700;
+  font-size: 2.2rem;
+  letter-spacing: 0.05rem;
+  margin-bottom: 1.5rem;
+  text-shadow: 0 0 18px #4a90e2;
+  max-width: 90%;
+  word-wrap: break-word;
+}
+
+/* Button styling */
+#start-page button {
+  margin: 10px 0;
+  padding: 14px 40px;
+  background: #4a90e2;
+  color: white;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.07rem;
+  box-shadow: 0 0 22px #4a90e2;
+  transition: background-color 0.3s ease;
+  width: 90%;
+  max-width: 280px;
+}
+
+/* Button hover */
+#start-page button:hover {
+  background: #357abd;
+}
+
+/* Larger screens (desktop, TV) */
+@media (min-width: 768px) {
   #start-page h1 {
-    color: #62a0ff;
-    font-weight: 700;
-    font-size: 2.5rem;
+    font-size: 2.8rem;
     letter-spacing: 0.1rem;
-    margin-bottom: 2rem;
-    text-shadow: 0 0 18px #4a90e2;
   }
+
   #start-page button {
-    margin: 12px 0;
-    padding: 15px 50px;
-    background: #4a90e2;
-    color: white;
-    border: none;
-    border-radius: 25px;
-    cursor: pointer;
     font-size: 1.25rem;
-    font-weight: 700;
-    letter-spacing: 0.07rem;
-    box-shadow: 0 0 22px #4a90e2;
-    transition: background-color 0.3s ease;
-    width: 220px;
+    padding: 15px 50px;
+    width: 260px;
   }
-  #start-page button:hover {
-    background: #357abd;
+}
+
+/* Ultra-large screens (TV/4K monitors) */
+@media (min-width: 1200px) {
+  #start-page h1 {
+    font-size: 3.5rem;
   }
+
+  #start-page button {
+    font-size: 1.4rem;
+    width: 300px;
+  }
+}
+
 
   /* Leaderboard & Settings Overlay */
   #leaderboard, #settings {
