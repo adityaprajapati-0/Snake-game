@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+<meta name="viewport" content="width=device-width, user-scalable=no" />
 <title>Snake Game</title>
 <link rel="icon" type="favicon.svg" href="/snake.svg" />
 <style>
@@ -36,6 +36,7 @@
     flex-direction: column;
     align-items: center;
     padding: 10px;
+    z-index: 1;
   }
 
   canvas {
@@ -80,6 +81,7 @@
     pointer-events: none;
     letter-spacing: 2px;
     text-shadow: 0 0 5px #4169e1aa;
+    z-index: 10;
   }
 
   /* Game Over Overlay */
@@ -141,45 +143,368 @@
     display: none;
   }
 
+  /* "Back to Menu" button */
+  #back-to-menu-btn {
+    position: fixed;
+    top: 12px;
+    left: 12px;
+    background: #4a90e2;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    color: white;
+    font-weight: 700;
+    font-family: 'Montserrat', sans-serif;
+    cursor: pointer;
+    box-shadow: 0 0 12px #357abd;
+    transition: background-color 0.3s ease;
+    z-index: 10000;
+  }
+  #back-to-menu-btn:hover {
+    background: #357abd;
+  }
+
+  /* Pop-up styles */
+  #name-popup {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    visibility: visible;
+    opacity: 1;
+    transition: opacity 0.4s ease;
+    z-index: 1000;
+  }
+  #name-popup.hidden {
+    visibility: hidden;
+    opacity: 0;
+  }
+  #name-popup-content {
+    background: #141e37;
+    color: #fff;
+    padding: 30px 40px;
+    border-radius: 15px;
+    text-align: center;
+    box-shadow: 0 0 40px #446bf585;
+    font-family: 'Montserrat', sans-serif;
+  }
+  #name-popup-content h2 {
+    margin: 0 0 20px;
+    font-weight: 600;
+    letter-spacing: 1.2px;
+    text-shadow: 0 0 5px #4a90e2;
+  }
+  #name-input {
+    margin-top: 10px;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 10px;
+    width: 250px;
+    font-size: 1.1rem;
+    text-align: center;
+    outline: none;
+  }
+  #submit-name {
+    margin-top: 20px;
+    padding: 12px 40px;
+    background: #4a90e2;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 1.1px;
+    box-shadow: 0 0 20px #357abd;
+    transition: background-color 0.25s ease;
+  }
+  #submit-name:hover {
+    background: #357abd;
+  }
+
+  /* Starting Page */
+  #start-page {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(20, 29, 55, 0.95);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    z-index: 900;
+    font-family: 'Montserrat', sans-serif;
+  }
+  #start-page.visible {
+    visibility: visible;
+    opacity: 1;
+  }
+  #start-page h1 {
+    color: #62a0ff;
+    font-weight: 700;
+    font-size: 2.5rem;
+    letter-spacing: 0.1rem;
+    margin-bottom: 2rem;
+    text-shadow: 0 0 18px #4a90e2;
+  }
+  #start-page button {
+    margin: 12px 0;
+    padding: 15px 50px;
+    background: #4a90e2;
+    color: white;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: 0.07rem;
+    box-shadow: 0 0 22px #4a90e2;
+    transition: background-color 0.3s ease;
+    width: 220px;
+  }
+  #start-page button:hover {
+    background: #357abd;
+  }
+
+  /* Leaderboard & Settings Overlay */
+  #leaderboard, #settings {
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: #141e37;
+    border-radius: 20px;
+    padding: 30px 40px;
+    box-shadow: 0 0 50px #446bf5bb;
+    color: white;
+    max-width: 320px;
+    max-height: 400px;
+    overflow-y: auto;
+    z-index: 1100;
+    display: none;
+    font-family: 'Montserrat', sans-serif;
+  }
+  #leaderboard.visible, #settings.visible {
+    display: block;
+  }
+  #leaderboard h2, #settings h2 {
+    margin-top: 0;
+    font-weight: 700;
+    font-size: 1.5rem;
+    letter-spacing: 0.05rem;
+    margin-bottom: 20px;
+    text-align: center;
+    text-shadow: 0 0 7px #4a90e2;
+  }
+  #leaderboard ul {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 20px 0;
+  }
+  #leaderboard li {
+    font-size: 1.1rem;
+    padding: 6px 0;
+    border-bottom: 1px solid #357abd44;
+  }
+  #leaderboard li:last-child {
+    border-bottom: none;
+  }
+  #close-leaderboard, #close-settings {
+    background: #4a90e2;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 20px;
+    cursor: pointer;
+    color: white;
+    font-weight: 600;
+    font-size: 1rem;
+    display: block;
+    margin: 0 auto;
+    box-shadow: 0 0 15px #357abd;
+    transition: background-color 0.3s ease;
+  }
+  #close-leaderboard:hover, #close-settings:hover {
+    background: #357abd;
+  }
+  #settings label {
+    font-weight: 600;
+    font-size: 1.1rem;
+  }
+  #name-change {
+    margin-top: 8px;
+    padding: 10px;
+    border-radius: 10px;
+    border: none;
+    width: 100%;
+    font-size: 1rem;
+    text-align: center;
+    outline: none;
+  }
+  #change-name-btn {
+    margin-top: 15px;
+    width: 100%;
+    padding: 12px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    border-radius: 25px;
+    border: none;
+    cursor: pointer;
+    background: #4a90e2;
+    color: white;
+    box-shadow: 0 0 20px #357abd;
+    transition: background-color 0.3s ease;
+  }
+  #change-name-btn:hover {
+    background: #357abd;
+  }
+  #change-skin {
+    margin-top: 30px;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+  }
+  .color-option {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: 0 0 8px transparent;
+    border: 2px solid transparent;
+    transition: box-shadow 0.3s ease, border-color 0.3s ease;
+  }
+  .color-option:hover {
+    box-shadow: 0 0 12px #4a90e2;
+  }
+  .color-option.selected {
+    border-color: white;
+    box-shadow: 0 0 20px #4a90e2;
+  }
+
+  /* Scrollbar styles for Settings and Leaderboard */
+  #settings::-webkit-scrollbar, #leaderboard::-webkit-scrollbar {
+    width: 8px;
+  }
+  #settings::-webkit-scrollbar-thumb, #leaderboard::-webkit-scrollbar-thumb {
+    background-color: #4a90e2;
+    border-radius: 10px;
+  }
+  #settings::-webkit-scrollbar-thumb:hover, #leaderboard::-webkit-scrollbar-thumb:hover {
+    background-color: #357abd;
+  }
+  #settings::-webkit-scrollbar-track, #leaderboard::-webkit-scrollbar-track {
+    background-color: #141e37;
+  }
 </style>
 </head>
 <body>
-<div id="game-container">
-  <canvas id="game" width="360" height="360" tabindex="0"></canvas>
-  <div id="scoreboard">
+
+<!-- Name entry pop-up -->
+<div id="name-popup" aria-modal="true" role="dialog" aria-labelledby="name-popup-label">
+  <div id="name-popup-content">
+    <h2 id="name-popup-label">Enter Your Name</h2>
+    <input type="text" id="name-input" placeholder="Your Name" aria-label="Player name" />
+    <button id="submit-name" aria-label="Submit Name">OK</button>
+  </div>
+</div>
+
+<!-- Starting page -->
+<div id="start-page" role="main" aria-hidden="true">
+  <h1>Welcome to Snake Game</h1>
+  <button id="start-btn" aria-label="Start Game">Start</button>
+  <button id="leaderboard-btn" aria-label="Open Leaderboard">Leaderboard</button>
+  <button id="settings-btn" aria-label="Open Settings">Settings</button>
+</div>
+
+<!-- Leaderboard overlay -->
+<div id="leaderboard" role="dialog" aria-modal="true" aria-labelledby="leaderboard-label" aria-hidden="true">
+  <h2 id="leaderboard-label">Leaderboard</h2>
+  <ul id="leaderboard-list" aria-live="polite" aria-relevant="additions"></ul>
+  <button id="close-leaderboard" aria-label="Close Leaderboard">Close</button>
+</div>
+
+<!-- Settings overlay -->
+<div id="settings" role="dialog" aria-modal="true" aria-labelledby="settings-label" aria-hidden="true">
+  <h2 id="settings-label">Settings</h2>
+  <label for="name-change">Change Name:</label>
+  <input type="text" id="name-change" placeholder="New Name" aria-label="Change player name" />
+  <button id="change-name-btn" aria-label="Change Name">Change Name</button>
+  <h3>Change Skin:</h3>
+  <div id="change-skin" aria-label="Choose snake skin color"></div>
+  <button id="close-settings" aria-label="Close Settings">Close</button>
+</div>
+
+<!-- The original game container -->
+<div id="game-container" aria-hidden="true">
+  <button id="back-to-menu-btn" aria-label="Back to Menu">Back to Menu</button>
+  <canvas id="game" width="360" height="360" tabindex="0" aria-label="Game canvas"></canvas>
+  <div id="scoreboard" role="region" aria-live="polite" aria-atomic="true">
     <div>Score: <span id="score">0</span></div>
     <div>Speed: <span id="speed">1</span></div>
   </div>
-  <div id="instructions">
+  <div id="instructions" aria-live="polite" aria-atomic="true">
     Use arrow keys or swipe to control.<br />
     Press SPACE to Pause/Resume.
   </div>
   <div id="pause-indicator">PAUSED</div>
-  <div id="game-over-screen">
+  <div id="game-over-screen" aria-live="assertive" aria-atomic="true">
     GAME OVER
     <div id="game-over-score"></div>
     <button id="restart-btn">RESTART</button>
   </div>
 </div>
+
 <div id="made-by-adi">Made by Adi</div>
 
 <script>
 (() => {
+  // Elements
+  const namePopup = document.getElementById('name-popup');
+  const nameInput = document.getElementById('name-input');
+  const submitNameBtn = document.getElementById('submit-name');
+  const startPage = document.getElementById('start-page');
+  const startBtn = document.getElementById('start-btn');
+  const leaderboardBtn = document.getElementById('leaderboard-btn');
+  const settingsBtn = document.getElementById('settings-btn');
+  const leaderboard = document.getElementById('leaderboard');
+  const leaderboardList = document.getElementById('leaderboard-list');
+  const closeLeaderboardBtn = document.getElementById('close-leaderboard');
+  const settings = document.getElementById('settings');
+  const nameChangeInput = document.getElementById('name-change');
+  const changeNameBtn = document.getElementById('change-name-btn');
+  const closeSettingsBtn = document.getElementById('close-settings');
+  const changeSkinDiv = document.getElementById('change-skin');
+  const gameContainer = document.getElementById('game-container');
+  const backToMenuBtn = document.getElementById('back-to-menu-btn');
+
+  // Game elements
   const canvas = document.getElementById('game');
   const ctx = canvas.getContext('2d');
+  const scoreEl = document.getElementById('score');
+  const speedEl = document.getElementById('speed');
+  const gameOverScreen = document.getElementById('game-over-screen');
+  const gameOverScore = document.getElementById('game-over-score');
+  const restartBtn = document.getElementById('restart-btn');
+  const pauseIndicator = document.getElementById('pause-indicator');
 
   // Constants
   const COLS = 18;
   const ROWS = 18;
   const CELL_SIZE = canvas.width / COLS;
-
-  // Directions
   const DIRS = {
     LEFT:  { x: -1, y: 0 },
     RIGHT: { x: 1, y: 0 },
     UP:    { x: 0, y: -1 },
     DOWN:  { x: 0, y: 1 }
   };
+  const colors = ['#FF5733', '#33FF57', '#3357FF', '#F1C40F', '#8E44AD', '#E74C3C', '#3498DB', '#2ECC71', '#1ABC9C', '#F39C12', '#D35400', '#C0392B', '#9B59B6', '#2980B9', '#27AE60', '#8E44AD', '#34495E', '#2C3E50', '#ECF0F1', '#95A5A6'];
+
+  // Player data stored local
+  let playerName = localStorage.getItem('snakePlayerName') || '';
+  let playerSkinColor = localStorage.getItem('snakeSkinColor') || '#4b8bf5';
+  let highestScore = +localStorage.getItem('snakeHighestScore') || 0;
 
   // Game state
   let snake = [{x:9, y:9}];
@@ -191,31 +516,167 @@
   let speedLevel = 1;
   const maxSpeedLevel = 15;
   const speedIncrementScoreStep = 5;
-
   let lastMoveTime = 0;
   let gameOver = false;
   let paused = false;
-
-  // Variables for smooth movement interpolation
-  let moveProgress = 0;  // Progress of movement from 0 to 1 between cell steps
-  // We keep last and next head positions to interpolate visual positions
+  let moveProgress = 0;
   let lastHeadPos = { x: 9, y: 9 };
   let nextHeadPos = { x: 9, y: 9 };
-
-  // Touch controls state
   let touchStartX = null;
   let touchStartY = null;
   const minSwipeDist = 30;
 
-  // UI Elements
-  const scoreEl = document.getElementById('score');
-  const speedEl = document.getElementById('speed');
-  const gameOverScreen = document.getElementById('game-over-screen');
-  const gameOverScore = document.getElementById('game-over-score');
-  const restartBtn = document.getElementById('restart-btn');
-  const pauseIndicator = document.getElementById('pause-indicator');
+  // Focus management helper
+  function trapFocus(container) {
+    const focusableElementsString = 'a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), iframe, object, embed, *[tabindex], *[contenteditable]';
+    let focusableElements = container.querySelectorAll(focusableElementsString);
+    focusableElements = Array.prototype.slice.call(focusableElements);
 
-  // Helpers
+    if(focusableElements.length === 0) return;
+
+    let firstTabStop = focusableElements[0];
+    let lastTabStop = focusableElements[focusableElements.length - 1];
+
+    container.addEventListener('keydown', function(e) {
+      if (e.key === 'Tab' || e.keyCode === 9) {
+        if (e.shiftKey) { // Shift + Tab
+          if (document.activeElement === firstTabStop) {
+            e.preventDefault();
+            lastTabStop.focus();
+          }
+        } else { // Tab
+          if (document.activeElement === lastTabStop) {
+            e.preventDefault();
+            firstTabStop.focus();
+          }
+        }
+      }
+    });
+  }
+
+  // Update leaderboard UI function
+  function updateLeaderboard() {
+    leaderboardList.innerHTML = '';
+    const li = document.createElement('li');
+    li.textContent = playerName + ': ' + highestScore;
+    leaderboardList.appendChild(li);
+  }
+
+  // Color selection for skin
+  let selectedSkinColor = playerSkinColor;
+  function renderSkinColors() {
+    changeSkinDiv.innerHTML = '';
+    colors.forEach(color => {
+      const colorOption = document.createElement('div');
+      colorOption.classList.add('color-option');
+      colorOption.style.backgroundColor = color;
+      if(color === selectedSkinColor) colorOption.classList.add('selected');
+      colorOption.addEventListener('click', () => {
+        selectedSkinColor = color;
+        playerSkinColor = color;
+        localStorage.setItem('snakeSkinColor', playerSkinColor);
+        document.querySelectorAll('.color-option').forEach(el => el.classList.remove('selected'));
+        colorOption.classList.add('selected');
+      });
+      changeSkinDiv.appendChild(colorOption);
+    });
+  }
+
+  // Show name popup if name not set
+  if(!playerName) {
+    namePopup.classList.remove('hidden');
+    startPage.classList.remove('visible');
+    gameContainer.setAttribute('aria-hidden', 'true');
+    trapFocus(namePopup);
+  } else {
+    namePopup.classList.add('hidden');
+    startPage.classList.add('visible');
+    gameContainer.setAttribute('aria-hidden', 'true');
+  }
+
+  // Name input submit
+  submitNameBtn.addEventListener('click', () => {
+    const val = nameInput.value.trim();
+    if(val.length === 0) {
+      alert('Please enter a name');
+      nameInput.focus();
+      return;
+    }
+    playerName = val;
+    localStorage.setItem('snakePlayerName', playerName);
+    namePopup.classList.add('hidden');
+    startPage.classList.add('visible');
+    gameContainer.setAttribute('aria-hidden', 'true');
+    trapFocus(startPage);
+  });
+
+  // Start game button
+  startBtn.addEventListener('click', () => {
+    startPage.classList.remove('visible');
+    gameContainer.setAttribute('aria-hidden', 'false');
+    resetGame();
+    gameLoop();
+    canvas.focus();
+  });
+
+  // Leaderboard button
+  leaderboardBtn.addEventListener('click', () => {
+    updateLeaderboard();
+    startPage.classList.remove('visible');
+    leaderboard.classList.add('visible');
+    leaderboard.setAttribute('aria-hidden', 'false');
+    trapFocus(leaderboard);
+  });
+
+  // Close leaderboard
+  closeLeaderboardBtn.addEventListener('click', () => {
+    leaderboard.classList.remove('visible');
+    leaderboard.setAttribute('aria-hidden', 'true');
+    startPage.classList.add('visible');
+    trapFocus(startPage);
+  });
+
+  // Settings button
+  settingsBtn.addEventListener('click', () => {
+    nameChangeInput.value = playerName;
+    renderSkinColors();
+    startPage.classList.remove('visible');
+    settings.classList.add('visible');
+    settings.setAttribute('aria-hidden', 'false');
+    trapFocus(settings);
+  });
+
+  // Change name button
+  changeNameBtn.addEventListener('click', () => {
+    const newName = nameChangeInput.value.trim();
+    if(newName.length === 0) {
+      alert('Name cannot be empty');
+      return;
+    }
+    playerName = newName;
+    localStorage.setItem('snakePlayerName', playerName);
+    alert('Name changed to: ' + playerName);
+  });
+
+  // Close settings button
+  closeSettingsBtn.addEventListener('click', () => {
+    settings.classList.remove('visible');
+    settings.setAttribute('aria-hidden', 'true');
+    startPage.classList.add('visible');
+    trapFocus(startPage);
+  });
+
+  // Back to menu button functionality
+  backToMenuBtn.addEventListener('click', () => {
+    // Stop game loop by setting gameOver state
+    gameOver = true;
+    // Hide game container, show start page
+    gameContainer.setAttribute('aria-hidden', 'true');
+    startPage.classList.add('visible');
+    trapFocus(startPage);
+  });
+
+  // Helper functions for game logic
   function randomPosition() {
     return {
       x: Math.floor(Math.random() * COLS),
@@ -261,7 +722,6 @@
     return start + (end - start) * t;
   }
 
-  // Interpolate positions for smooth transitions
   function interpPos(startPos, endPos, t) {
     return {
       x: lerp(startPos.x, endPos.x, t),
@@ -288,71 +748,37 @@
   }
 
   function drawSnake(t) {
-    // Draw snake with smooth interpolation
-    // For each segment, calculate interpolated position between current cell and previous cell, except head which interpolate with lastHeadPos & nextHeadPos
-
-    // We'll build an array of segment positions interpolated between their last and next positions
-
-    // The snake moves by adding a new head and removing tail every step - to get smooth effect, we interpolate between those positions during moveProgress
-
-    // Create an array for segment positions:
-    // - The head moves from lastHeadPos to nextHeadPos
-    // - Each body segment moves from previous segment's last position to current segment's last position
-
-    // Copy snake positions for interpolation
     let interpSegments = [];
-
-    // If snake length is 1, just interpolate head between last and next
     if(snake.length === 1) {
       let pos = interpPos(lastHeadPos, nextHeadPos, moveProgress);
       interpSegments.push(pos);
     } else {
-      // Head interpolation
       let headInterp = interpPos(lastHeadPos, nextHeadPos, moveProgress);
       interpSegments[snake.length - 1] = headInterp;
-
-      // For other segments, interpolate from the segment at i-1's previous pos to i's previous pos (the snake array stores only current positions)
-      // We'll guess last positions for the segments where each segment moves toward position of segment before it
-
-      // We build interpolated positions from tail to head-1
       for(let i = snake.length - 2; i >= 0; i--) {
-        // current segment position
         let currentPos = snake[i];
-        // next segment position
         let nextPos = snake[i + 1];
-        // interpolate between currentPos and nextPos inverse to head
-        // so movement primes from tail to head
         interpSegments[i] = interpPos(currentPos, nextPos, moveProgress);
       }
     }
-
-    // Draw segments with gradient color
-    let gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-    gradient.addColorStop(0, '#4b8bf5');
-    gradient.addColorStop(1, '#1763e8');
-
     ctx.shadowColor = '#2f74e3cc';
     ctx.shadowBlur = 6;
 
-    // Draw body segments
     for(let i = 0; i < interpSegments.length; i++) {
       let pos = interpSegments[i];
-      // Head is last segment
       if(i === interpSegments.length - 1) {
-        // Draw bright circle with inner smaller circle
         drawCell(pos.x, pos.y, '#f0f8ff', CELL_SIZE * 0.4);
-        ctx.fillStyle = gradient;
-        drawCell(pos.x, pos.y, gradient);
+        ctx.fillStyle = playerSkinColor;
+        drawCell(pos.x, pos.y, playerSkinColor);
       } else {
-        ctx.fillStyle = gradient;
-        drawCell(pos.x, pos.y, gradient);
+        ctx.fillStyle = playerSkinColor;
+        drawCell(pos.x, pos.y, playerSkinColor);
       }
     }
     ctx.shadowBlur = 0;
   }
 
   function drawFood(t) {
-    // Animate a glowing pulsing effect for food
     const pulse = Math.sin(t / 300) * 0.3 + 1;
     ctx.shadowColor = '#ff6d4c';
     ctx.shadowBlur = 15 * pulse;
@@ -360,7 +786,6 @@
     ctx.shadowBlur = 0;
   }
 
-  // Game logic
   function update() {
     if (gameOver || paused) return;
 
@@ -368,22 +793,17 @@
     let timeSinceMove = now - lastMoveTime;
     if (timeSinceMove < 1000 / speed) return;
 
-    // We finished a full step movement by now
     lastMoveTime = now;
-    moveProgress = 0; // reset interp progress
+    moveProgress = 0;
 
-    // Update direction from input
-    // Prevent reversing direction
     if ((nextDirection.x !== -direction.x || nextDirection.y !== -direction.y) && (nextDirection.x !== 0 || nextDirection.y !== 0)) {
       direction = nextDirection;
     }
 
-    // Calculate new head position
     let head = snake[snake.length - 1];
     lastHeadPos = {...head};
     let newHead = { x: head.x + direction.x, y: head.y + direction.y };
 
-    // Wall collision (wrap around)
     if (newHead.x < 0) newHead.x = COLS - 1;
     else if (newHead.x >= COLS) newHead.x = 0;
     if (newHead.y < 0) newHead.y = ROWS - 1;
@@ -391,7 +811,6 @@
 
     nextHeadPos = {...newHead};
 
-    // Self collision
     if (snake.some(seg => positionsEqual(seg, newHead))) {
       endGame();
       return;
@@ -399,27 +818,27 @@
 
     snake.push(newHead);
 
-    // Check if food eaten
     if (positionsEqual(newHead, food)) {
       score++;
+      if(score > highestScore){
+        highestScore = score;
+        localStorage.setItem('snakeHighestScore', highestScore);
+      }
       scoreEl.textContent = score;
 
-      // Increase speed tier every few points
       if (score % speedIncrementScoreStep === 0 && speedLevel < maxSpeedLevel) {
         speedLevel++;
-        speed += 2; // Increase moves per second
+        speed += 2;
         speedEl.textContent = speedLevel;
       }
 
       placeFood();
     } else {
-      // Remove tail if no food eaten to move forward
       snake.shift();
     }
   }
 
   function draw(t) {
-    // Calculate move progress for interpolation between moves (0 to 1)
     if (!gameOver && !paused) {
       let now = performance.now();
       let elapsed = now - lastMoveTime;
@@ -429,7 +848,6 @@
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Draw grid subtle for aesthetics
     ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
     ctx.lineWidth = 1;
     for(let i = 0; i <= COLS; i++) {
@@ -458,28 +876,19 @@
   function gameLoop(t = 0) {
     update();
     draw(t);
-    window.requestAnimationFrame(gameLoop);
+    if(!gameOver) window.requestAnimationFrame(gameLoop);
   }
 
-  // Input handlers
   window.addEventListener('keydown', e => {
     if (gameOver) return;
     switch(e.key) {
-      case 'ArrowUp': 
-      case 'w':
-      case 'W':
+      case 'ArrowUp': case 'w': case 'W':
         if(direction !== DIRS.DOWN) nextDirection = DIRS.UP; break;
-      case 'ArrowDown': 
-      case 's':
-      case 'S':
+      case 'ArrowDown': case 's': case 'S':
         if(direction !== DIRS.UP) nextDirection = DIRS.DOWN; break;
-      case 'ArrowLeft': 
-      case 'a':
-      case 'A':
+      case 'ArrowLeft': case 'a': case 'A':
         if(direction !== DIRS.RIGHT) nextDirection = DIRS.LEFT; break;
-      case 'ArrowRight': 
-      case 'd':
-      case 'D':
+      case 'ArrowRight': case 'd': case 'D':
         if(direction !== DIRS.LEFT) nextDirection = DIRS.RIGHT; break;
       case ' ':
       case 'Spacebar':
@@ -488,7 +897,6 @@
     }
   });
 
-  // Touch Swipe handler
   canvas.addEventListener('touchstart', e => {
     if(e.touches.length === 1) {
       touchStartX = e.touches[0].clientX;
@@ -498,30 +906,22 @@
 
   canvas.addEventListener('touchend', e => {
     if(gameOver) return;
-
     if(touchStartX === null || touchStartY === null) return;
-
     let touchEndX = e.changedTouches[0].clientX;
     let touchEndY = e.changedTouches[0].clientY;
-
     let dx = touchEndX - touchStartX;
     let dy = touchEndY - touchStartY;
-
     if(Math.abs(dx) > Math.abs(dy)) {
-      // Horizontal swipe
       if(dx > minSwipeDist && direction !== DIRS.LEFT) nextDirection = DIRS.RIGHT;
       else if(dx < -minSwipeDist && direction !== DIRS.RIGHT) nextDirection = DIRS.LEFT;
     } else {
-      // Vertical swipe
       if(dy > minSwipeDist && direction !== DIRS.UP) nextDirection = DIRS.DOWN;
       else if(dy < -minSwipeDist && direction !== DIRS.DOWN) nextDirection = DIRS.UP;
     }
-
     touchStartX = null;
     touchStartY = null;
   });
 
-  // Pause/resume toggle
   function togglePause() {
     if(gameOver) return;
     paused = !paused;
@@ -530,26 +930,39 @@
     }
   }
 
-  // End game
   function endGame() {
     gameOver = true;
     gameOverScore.textContent = "Your Score: " + score;
     gameOverScreen.classList.add('visible');
   }
 
-  // Restart game
   restartBtn.addEventListener('click', () => {
     resetGame();
   });
 
-  // Set initial game state and start loop
-  resetGame();
-  gameLoop();
+  // Back to menu button functionality
+  backToMenuBtn.addEventListener('click', () => {
+    // Stop game loop by setting gameOver state
+    gameOver = true;
+    // Hide game container, show start page
+    gameContainer.setAttribute('aria-hidden', 'true');
+    startPage.classList.add('visible');
+    trapFocus(startPage);
+  });
 
-  // Focus canvas so keyboard always works
-  canvas.focus();
+  // If previously opened, do not show game immediately
+  if(playerName) {
+    // Show start page with hidden game container
+    startPage.classList.add('visible');
+    gameContainer.setAttribute('aria-hidden', 'true');
+  } else {
+    // Show name popup
+    namePopup.classList.remove('hidden');
+    startPage.classList.remove('visible');
+    gameContainer.setAttribute('aria-hidden', 'true');
+  }
 
-})();  
+})();
 </script>
 </body>
 </html>
