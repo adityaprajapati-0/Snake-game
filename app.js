@@ -48,7 +48,7 @@
   let score = 0;
   let speed = 5;
   let speedLevel = 1;
-  const maxSpeedLevel = 15;
+  const maxSpeedLevel = 10;
   const speedIncrementScoreStep = 5;
   let lastMoveTime = 0;
   let gameOver = false;
@@ -58,7 +58,7 @@
   let nextHeadPos = { x: 9, y: 9 };
   let touchStartX = null;
   let touchStartY = null;
-  const minSwipeDist = 30;
+  const minSwipeDist = 5;
 
   function trapFocus(container) {
     const focusableElementsString = 'a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), iframe, object, embed, *[tabindex], *[contenteditable]';
@@ -440,30 +440,35 @@ settingsBtn.addEventListener('click', () => {
     }
   });
 
-  canvas.addEventListener('touchstart', e => {
-    if(e.touches.length === 1) {
-      touchStartX = e.touches[0].clientX;
-      touchStartY = e.touches[0].clientY;
-    }
-  });
+document.addEventListener('touchstart', e => {
+  if(e.touches.length === 1) {
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+  }
+});
 
-  canvas.addEventListener('touchend', e => {
-    if(gameOver) return;
-    if(touchStartX === null || touchStartY === null) return;
-    let touchEndX = e.changedTouches[0].clientX;
-    let touchEndY = e.changedTouches[0].clientY;
-    let dx = touchEndX - touchStartX;
-    let dy = touchEndY - touchStartY;
-    if(Math.abs(dx) > Math.abs(dy)) {
-      if(dx > minSwipeDist && direction !== DIRS.LEFT) nextDirection = DIRS.RIGHT;
-      else if(dx < -minSwipeDist && direction !== DIRS.RIGHT) nextDirection = DIRS.LEFT;
-    } else {
-      if(dy > minSwipeDist && direction !== DIRS.UP) nextDirection = DIRS.DOWN;
-      else if(dy < -minSwipeDist && direction !== DIRS.DOWN) nextDirection = DIRS.UP;
-    }
-    touchStartX = null;
-    touchStartY = null;
-  });
+document.addEventListener('touchend', e => {
+  if(gameOver) return;
+  if(touchStartX === null || touchStartY === null) return;
+
+  let touchEndX = e.changedTouches[0].clientX;
+  let touchEndY = e.changedTouches[0].clientY;
+
+  let dx = touchEndX - touchStartX;
+  let dy = touchEndY - touchStartY;
+
+  if(Math.abs(dx) > Math.abs(dy)) {
+    if(dx > minSwipeDist && direction !== DIRS.LEFT) nextDirection = DIRS.RIGHT;
+    else if(dx < -minSwipeDist && direction !== DIRS.RIGHT) nextDirection = DIRS.LEFT;
+  } else {
+    if(dy > minSwipeDist && direction !== DIRS.UP) nextDirection = DIRS.DOWN;
+    else if(dy < -minSwipeDist && direction !== DIRS.DOWN) nextDirection = DIRS.UP;
+  }
+
+  touchStartX = null;
+  touchStartY = null;
+});
+
 
   function togglePause() {
     if(gameOver) return;
