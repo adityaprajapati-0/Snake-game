@@ -70,6 +70,41 @@ canvas {
   text-shadow: 0 0 5px #4169e1aa;
   z-index: 10;
 }
+#developer-info {
+  position: fixed;
+  bottom: 12px;
+  left: 20px;
+  text-align: center;
+  z-index: 100;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 11px;
+  color: #a5b8ffcc;
+  user-select: none;
+  pointer-events: auto;
+  letter-spacing: 2px;
+  text-shadow: 0 0 5px #4169e1aa;
+}
+
+#developer-info p {
+  margin: 0 0 6px;
+}
+
+.social-icons {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+}
+
+.social-icons a svg {
+  transition: transform 0.2s ease, fill 0.3s ease;
+  fill: #a5b8ffcc;
+}
+
+.social-icons a:hover svg {
+  transform: scale(1.2);
+  fill: #4a90e2;
+}
+
 #game-over-screen {
   position: absolute;
   top: 0; left: 0; right: 0; bottom: 0;
@@ -89,6 +124,7 @@ canvas {
   transition: opacity 0.4s ease;
   user-select: none;
 }
+
 #game-over-screen.visible {
   visibility: visible;
   opacity: 1;

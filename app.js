@@ -147,20 +147,29 @@
     canvas.focus();
   });
 
-  leaderboardBtn.addEventListener('click', () => {
-    updateLeaderboard();
-    startPage.classList.remove('visible');
-    leaderboard.classList.add('visible');
-    leaderboard.setAttribute('aria-hidden', 'false');
-    trapFocus(leaderboard);
-  });
+leaderboardBtn.addEventListener('click', () => {
+  updateLeaderboard();
+  startPage.classList.remove('visible');
+  leaderboard.classList.add('visible');
+  leaderboard.setAttribute('aria-hidden', 'false');
 
-  closeLeaderboardBtn.addEventListener('click', () => {
-    leaderboard.classList.remove('visible');
-    leaderboard.setAttribute('aria-hidden', 'true');
-    startPage.classList.add('visible');
-    trapFocus(startPage);
-  });
+  // Hide back to menu while leaderboard is open
+  backToMenuBtn.style.display = 'none';
+
+  trapFocus(leaderboard);
+});
+
+closeLeaderboardBtn.addEventListener('click', () => {
+  leaderboard.classList.remove('visible');
+  leaderboard.setAttribute('aria-hidden', 'true');
+
+  // Show back to menu again
+  backToMenuBtn.style.display = 'block';
+
+  startPage.classList.add('visible');
+  trapFocus(startPage);
+});
+
 
   settingsBtn.addEventListener('click', () => {
     nameChangeInput.value = playerName;
@@ -182,19 +191,35 @@
     alert('Name changed to: ' + playerName);
   });
 
-  closeSettingsBtn.addEventListener('click', () => {
-    settings.classList.remove('visible');
-    settings.setAttribute('aria-hidden', 'true');
-    startPage.classList.add('visible');
-    trapFocus(startPage);
-  });
+ closeSettingsBtn.addEventListener('click', () => {
+  settings.classList.remove('visible');
+  settings.setAttribute('aria-hidden', 'true');
 
-  backToMenuBtn.addEventListener('click', () => {
-    gameOver = true;
-    gameContainer.setAttribute('aria-hidden', 'true');
-    startPage.classList.add('visible');
-    trapFocus(startPage);
-  });
+  // Show back to menu again
+  backToMenuBtn.style.display = 'block';
+
+  startPage.classList.add('visible');
+  trapFocus(startPage);
+});
+
+backToMenuBtn.addEventListener('click', () => {
+  gameOver = true;
+  gameContainer.setAttribute('aria-hidden', 'true');
+  startPage.classList.add('visible');
+  trapFocus(startPage);
+});
+
+// When opening settings, hide the back-to-menu button
+settingsBtn.addEventListener('click', () => {
+  settings.classList.add('visible');
+  settings.setAttribute('aria-hidden', 'false');
+
+  // Hide back to menu while in settings
+  backToMenuBtn.style.display = 'none';
+
+  trapFocus(settings);
+});
+
 
   function randomPosition() {
     return {
@@ -456,6 +481,7 @@
 
   restartBtn.addEventListener('click', () => {
     resetGame();
+    gameLoop();
   });
 
   backToMenuBtn.addEventListener('click', () => {
