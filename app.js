@@ -1,4 +1,36 @@
 (() => {
+  /* ===============================
+   🔒 PREVENT MOBILE REFRESH / SCROLL
+================================ */
+
+let lastTouchYGlobal = 0;
+
+// Stop pull-to-refresh & swipe navigation
+document.addEventListener(
+  "touchstart",
+  (e) => {
+    if (e.touches.length === 1) {
+      lastTouchYGlobal = e.touches[0].clientY;
+    }
+  },
+  { passive: false }
+);
+
+document.addEventListener(
+  "touchmove",
+  (e) => {
+    const currentY = e.touches[0].clientY;
+
+    // 🔥 prevent downward pull (refresh)
+    if (currentY > lastTouchYGlobal) {
+      e.preventDefault();
+    }
+
+    lastTouchYGlobal = currentY;
+  },
+  { passive: false }
+);
+
   const namePopup = document.getElementById('name-popup');
   const nameInput = document.getElementById('name-input');
   const submitNameBtn = document.getElementById('submit-name');
@@ -440,34 +472,50 @@ settingsBtn.addEventListener('click', () => {
     }
   });
 
-document.addEventListener('touchstart', e => {
-  if(e.touches.length === 1) {
-    touchStartX = e.touches[0].clientX;
-    touchStartY = e.touches[0].clientY;
-  }
-});
+document.addEventListener(
+  'touchstart',
+  e => {
+    if (e.touches.length === 1) {
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+    }
+    e.preventDefault(); // 🔥 BLOCK SCROLL
+  },
+  { passive: false }
+);
 
-document.addEventListener('touchend', e => {
-  if(gameOver) return;
-  if(touchStartX === null || touchStartY === null) return;
 
-  let touchEndX = e.changedTouches[0].clientX;
-  let touchEndY = e.changedTouches[0].clientY;
+document.addEventListener(
+  'touchend',
+  e => {
+    if (gameOver) return;
+    if (touchStartX === null || touchStartY === null) return;
 
-  let dx = touchEndX - touchStartX;
-  let dy = touchEndY - touchStartY;
+    let touchEndX = e.changedTouches[0].clientX;
+    let touchEndY = e.changedTouches[0].clientY;
 
-  if(Math.abs(dx) > Math.abs(dy)) {
-    if(dx > minSwipeDist && direction !== DIRS.LEFT) nextDirection = DIRS.RIGHT;
-    else if(dx < -minSwipeDist && direction !== DIRS.RIGHT) nextDirection = DIRS.LEFT;
-  } else {
-    if(dy > minSwipeDist && direction !== DIRS.UP) nextDirection = DIRS.DOWN;
-    else if(dy < -minSwipeDist && direction !== DIRS.DOWN) nextDirection = DIRS.UP;
-  }
+    let dx = touchEndX - touchStartX;
+    let dy = touchEndY - touchStartY;
 
-  touchStartX = null;
-  touchStartY = null;
-});
+    if (Math.abs(dx) > Math.abs(dy)) {
+      if (dx > minSwipeDist && direction !== DIRS.LEFT)
+        nextDirection = DIRS.RIGHT;
+      else if (dx < -minSwipeDist && direction !== DIRS.RIGHT)
+        nextDirection = DIRS.LEFT;
+    } else {
+      if (dy > minSwipeDist && direction !== DIRS.UP)
+        nextDirection = DIRS.DOWN;
+      else if (dy < -minSwipeDist && direction !== DIRS.DOWN)
+        nextDirection = DIRS.UP;
+    }
+
+    touchStartX = null;
+    touchStartY = null;
+    e.preventDefault(); // 🔥 STOP BROWSER ACTION
+  },
+  { passive: false }
+);
+
 
 
   function togglePause() {
@@ -495,7 +543,7 @@ document.addEventListener('touchend', e => {
     startPage.classList.add('visible');
     trapFocus(startPage);
   });
-
+  
   if(playerName) {
     startPage.classList.add('visible');
     gameContainer.setAttribute('aria-hidden', 'true');
@@ -505,4 +553,5 @@ document.addEventListener('touchend', e => {
     gameContainer.setAttribute('aria-hidden', 'true');
   }
 })();
+
 
