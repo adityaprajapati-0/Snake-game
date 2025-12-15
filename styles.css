@@ -604,3 +604,69 @@ button, input {
   0%,100% { opacity: 0.45; }
   50% { opacity: 0.85; }
 }
+/* ===============================
+   TOAST BASE (REUSE)
+================================ */
+.name-toast {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 9999;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.name-toast.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.name-toast-card {
+  background: radial-gradient(120% 120% at top left, #1e293b, #020617);
+  border-radius: 16px;
+  padding: 22px 26px;
+  text-align: center;
+  min-width: 260px;
+  max-width: 90%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+  animation: popIn 0.35s cubic-bezier(.2,.8,.2,1);
+}
+
+.name-toast-card h3 {
+  margin: 6px 0 6px;
+  font-size: 18px;
+  color: #f8fafc;
+}
+
+.name-toast-card p {
+  margin: 0;
+  font-size: 14px;
+  color: #cbd5f5;
+}
+
+.toast-hint {
+  display: block;
+  margin-top: 12px;
+  font-size: 11px;
+  opacity: 0.6;
+  color: #94a3b8;
+}
+
+.sparkle {
+  font-size: 22px;
+}
+
+@keyframes popIn {
+  from {
+    transform: scale(0.85);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}

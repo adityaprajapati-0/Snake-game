@@ -149,8 +149,9 @@ async function updateNameInDatabase(newName) {
 changeNameBtn.addEventListener('click', async () => {
   const newName = nameChangeInput.value.trim();
   if (newName.length === 0) {
-    alert('Name cannot be empty');
-    return;
+    showEmptyNameToast();
+return;
+
   }
 
   playerName = newName;
@@ -630,6 +631,40 @@ function showNameChangedToast(newName) {
     document.addEventListener("click", closeToast);
   }, 200);
 }
+function showEmptyNameToast() {
+  let old = document.getElementById("empty-name-toast");
+  if (old) old.remove();
+
+  const toast = document.createElement("div");
+  toast.id = "empty-name-toast";
+  toast.className = "name-toast";
+
+  toast.innerHTML = `
+    <div class="name-toast-card">
+      <span class="sparkle">⚠️</span>
+      <h3>Name can’t be empty</h3>
+      <p>Please enter a valid player name</p>
+      <small class="toast-hint">Tap anywhere to close</small>
+    </div>
+  `;
+
+  document.body.appendChild(toast);
+
+  requestAnimationFrame(() => {
+    toast.classList.add("show");
+  });
+
+  const closeToast = () => {
+    toast.classList.remove("show");
+    document.removeEventListener("click", closeToast);
+    setTimeout(() => toast.remove(), 300);
+  };
+
+  setTimeout(() => {
+    document.addEventListener("click", closeToast);
+  }, 200);
+}
+
 
 
 
