@@ -6,48 +6,63 @@ const pool = new Pool({
   ssl: { rejectUnauthorized: false },
 });
 
-export async function handler(event) {
+export default async (req) => {
   try {
-    // ✅ GET leaderboard
-    if (event.httpMethod === "GET") {
+
+    // =====================
+    // GET LEADERBOARD
+    // =====================
+    if (req.method === "GET") {
       const { rows } = await pool.query(
         "SELECT name, score FROM leaderboard ORDER BY score DESC LIMIT 10"
       );
-
-      return {
-        statusCode: 200,
+      return new Response(JSON.stringify(rows), {
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(rows),
-      };
+      });
     }
 
-    // ✅ POST score
-    if (event.httpMethod === "POST") {
-      const { name, score } = JSON.parse(event.body);
-
-      if (!name || typeof score !== "number") {
-        return { statusCode: 400, body: "Invalid data" };
-      }
+    // =====================
+    // POST SCORE (UPSERT)
+    // =====================
+    if (req.method === "POST") {
+      const { playerId, name, score } = await req.json();
 
       await pool.query(
         `
-        INSERT INTO leaderboard (name, score)
-        VALUES ($1, $2)
-        ON CONFLICT (name)
-        DO UPDATE SET score = GREATEST(leaderboard.score, EXCLUDED.score)
+        INSERT INTO leaderboard (player_id, name, score)
+        VALUES ($1, $2, $3)
+        ON CONFLICT (player_id)
+        DO UPDATE SET
+          name = EXCLUDED.name,
+          score = GREATEST(leaderboard.score, EXCLUDED.score)
         `,
-        [name, score]
+        [playerId, name, score]
       );
 
-      return {
-        statusCode: 200,
-        body: JSON.stringify({ success: true }),
-      };
+      return new Response("OK");
     }
 
-    return { statusCode: 405, body: "Method not allowed" };
+    // =====================
+    // PUT NAME UPDATE
+    // =====================
+    if (req.method === "PUT") {
+      const { playerId, name } = await req.json();
+
+      await pool.query(
+        `
+        UPDATE leaderboard
+        SET name = $1
+        WHERE player_id = $2
+        `,
+        [name, playerId]
+      );
+
+      return new Response("NAME UPDATED");
+    }
+
+    return new Response("Method not allowed", { status: 405 });
+
   } catch (err) {
-    console.error(err);
-    return { statusCode: 500, body: err.message };
+    return new Response(err.message, { status: 500 });
   }
-}
+};

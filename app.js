@@ -7,10 +7,17 @@ let playerSkinColor = localStorage.getItem("snakeSkinColor") || "#4b8bf5";
 let scoreSubmitted = false;
 let isGameActive = false;
 
+let bestScore = Number(localStorage.getItem("snakeBestScore") || 0);
 
 // Stop pull-to-refresh & swipe navigation
 
 let blockScroll = false;
+let playerId = localStorage.getItem("snakePlayerId");
+
+if (!playerId) {
+  playerId = crypto.randomUUID();
+  localStorage.setItem("snakePlayerId", playerId);
+}
 
 document.addEventListener(
   "touchmove",
@@ -114,12 +121,49 @@ async function submitScore(name, score) {
     await fetch("/.netlify/functions/leaderboard", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, score }),
+      body: JSON.stringify({
+        playerId,
+        name,
+        score
+      }),
     });
   } catch (err) {
     console.error("Score submit failed", err);
   }
 }
+async function updateNameInDatabase(newName) {
+  try {
+    await fetch("/.netlify/functions/leaderboard", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        playerId,
+        name: newName,
+      }),
+    });
+  } catch (err) {
+    console.error("Name update failed", err);
+  }
+}
+
+changeNameBtn.addEventListener('click', async () => {
+  const newName = nameChangeInput.value.trim();
+  if (newName.length === 0) {
+    alert('Name cannot be empty');
+    return;
+  }
+
+  playerName = newName;
+  localStorage.setItem("snakePlayerName", playerName);
+
+  // 🔥 DATABASE UPDATE
+  await updateNameInDatabase(playerName);
+
+  showNameChangedToast(playerName);
+});
+
+
+
 
 
  async function updateLeaderboard() {
@@ -234,16 +278,6 @@ closeLeaderboardBtn.addEventListener('click', () => {
     trapFocus(settings);
   });
 
-  changeNameBtn.addEventListener('click', () => {
-    const newName = nameChangeInput.value.trim();
-    if(newName.length === 0) {
-      alert('Name cannot be empty');
-      return;
-    }
-    playerName = newName;
-    
-    alert('Name changed to: ' + playerName);
-  });
 
  closeSettingsBtn.addEventListener('click', () => {
   settings.classList.remove('visible');
@@ -546,12 +580,58 @@ function endGame() {
   isGameActive = false;
   gameOverScore.textContent = "Your Score: " + score;
   gameOverScreen.classList.add('visible');
+if (score > bestScore) {
+  bestScore = score;
+  localStorage.setItem("snakeBestScore", bestScore);
+  launchCelebration();
+}
 
   if (!scoreSubmitted) {
     submitScore(playerName, score);
     scoreSubmitted = true;
   }
 }
+function launchCelebration() {
+  const el = document.getElementById("celebration");
+  el.classList.add("show");
+
+  setTimeout(() => {
+    el.classList.remove("show");
+  }, 2500);
+}
+function showNameChangedToast(newName) {
+  let old = document.getElementById("name-toast");
+  if (old) old.remove();
+
+  const toast = document.createElement("div");
+  toast.id = "name-toast";
+  toast.innerHTML = `
+    <div class="name-toast-card">
+      <span class="sparkle">✨</span>
+      <h3>Name Updated!</h3>
+      <p>Welcome, <b>${newName}</b></p>
+      <small class="toast-hint">Tap anywhere to close</small>
+    </div>
+  `;
+
+  document.body.appendChild(toast);
+
+  requestAnimationFrame(() => {
+    toast.classList.add("show");
+  });
+
+  const closeToast = () => {
+    toast.classList.remove("show");
+    document.removeEventListener("click", closeToast);
+    setTimeout(() => toast.remove(), 300);
+  };
+
+  setTimeout(() => {
+    document.addEventListener("click", closeToast);
+  }, 200);
+}
+
+
 
 
 
@@ -570,6 +650,7 @@ function endGame() {
 
   });
   
+
   if(playerName) {
     startPage.classList.add('visible');
     gameContainer.setAttribute('aria-hidden', 'true');
