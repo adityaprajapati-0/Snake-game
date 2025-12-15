@@ -445,3 +445,48 @@ html, body {
 button, input {
   touch-action: manipulation;
 }
+/* kill any inherited background */
+.close-x,
+.close-x::before,
+.close-x::after {
+  background: none !important;
+  box-shadow: none !important;
+}
+
+/* absolute clean X */
+.close-x {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+
+  background: none !important;
+  border: none;
+  padding: 0;
+  margin: 0;
+
+  font-size: 28px;
+  font-weight: 300;
+  line-height: 1;
+
+  color: #9ad1ff;
+  cursor: pointer;
+  z-index: 20;
+
+  text-shadow: 0 0 10px rgba(154, 209, 255, 0.9);
+  transition: transform 0.15s ease, color 0.15s ease;
+}
+
+.close-x:hover {
+  color: #ffffff;
+  transform: scale(1.15);
+}
+
+
+#settings[aria-hidden="false"] ~ #game-container #back-to-menu-btn,
+#leaderboard[aria-hidden="false"] ~ #game-container #back-to-menu-btn {
+  display: none !important;
+}
+#settings,
+#leaderboard {
+  z-index: 1000;
+}

@@ -2,6 +2,9 @@
   /* ===============================
    🔒 PREVENT MOBILE REFRESH / SCROLL
 ================================ */
+let playerName = localStorage.getItem("snakePlayerName") || "";
+let playerSkinColor = localStorage.getItem("snakeSkinColor") || "#4b8bf5";
+let scoreSubmitted = false;
 
 let lastTouchYGlobal = 0;
 
@@ -69,9 +72,7 @@ document.addEventListener(
   };
   const colors = ['#FF5733', '#33FF57', '#3357FF', '#F1C40F', '#8E44AD', '#E74C3C', '#3498DB', '#2ECC71', '#1ABC9C', '#F39C12', '#D35400', '#C0392B', '#9B59B6', '#2980B9', '#27AE60', '#8E44AD', '#34495E', '#2C3E50', '#ECF0F1', '#95A5A6'];
 
-  let playerName = localStorage.getItem('snakePlayerName') || '';
-  let playerSkinColor = localStorage.getItem('snakeSkinColor') || '#4b8bf5';
-  let highestScore = +localStorage.getItem('snakeHighestScore') || 0;
+  
 
   let snake = [{x:9, y:9}];
   let direction = DIRS.RIGHT;
@@ -118,13 +119,39 @@ document.addEventListener(
       }
     });
   }
-
-  function updateLeaderboard() {
-    leaderboardList.innerHTML = '';
-    const li = document.createElement('li');
-    li.textContent = playerName + ': ' + highestScore;
-    leaderboardList.appendChild(li);
+async function submitScore(name, score) {
+  try {
+    await fetch("/.netlify/functions/leaderboard", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, score }),
+    });
+  } catch (err) {
+    console.error("Score submit failed", err);
   }
+}
+
+
+ async function updateLeaderboard() {
+  leaderboardList.innerHTML = "Loading...";
+
+  try {
+    const res = await fetch("/.netlify/functions/leaderboard");
+    const data = await res.json();
+
+    leaderboardList.innerHTML = "";
+
+    data.forEach((row, i) => {
+      const li = document.createElement("li");
+      li.textContent = `${i + 1}. ${row.name} — ${row.score}`;
+      leaderboardList.appendChild(li);
+    });
+  } catch (err) {
+    leaderboardList.innerHTML = "Failed to load leaderboard";
+    console.error(err);
+  }
+}
+
 
   let selectedSkinColor = playerSkinColor;
   function renderSkinColors() {
@@ -137,7 +164,9 @@ document.addEventListener(
       colorOption.addEventListener('click', () => {
         selectedSkinColor = color;
         playerSkinColor = color;
-        localStorage.setItem('snakeSkinColor', playerSkinColor);
+        localStorage.setItem("snakeSkinColor", playerSkinColor);
+
+        
         document.querySelectorAll('.color-option').forEach(el => el.classList.remove('selected'));
         colorOption.classList.add('selected');
       });
@@ -155,41 +184,42 @@ document.addEventListener(
     startPage.classList.add('visible');
     gameContainer.setAttribute('aria-hidden', 'true');
   }
-
-  submitNameBtn.addEventListener('click', () => {
-    const val = nameInput.value.trim();
-    if(val.length === 0) {
-      alert('Please enter a name');
-      nameInput.focus();
-      return;
-    }
-    playerName = val;
-    localStorage.setItem('snakePlayerName', playerName);
-    namePopup.classList.add('hidden');
-    startPage.classList.add('visible');
-    gameContainer.setAttribute('aria-hidden', 'true');
-    trapFocus(startPage);
-  });
-
-  startBtn.addEventListener('click', () => {
-    startPage.classList.remove('visible');
-    gameContainer.setAttribute('aria-hidden', 'false');
-    resetGame();
-    gameLoop();
-    canvas.focus();
-  });
-
+startBtn.addEventListener('click', () => {
+  startPage.classList.remove('visible');
+  gameContainer.setAttribute('aria-hidden', 'false');
+  resetGame();
+  gameLoop();
+  canvas.focus();
+});
 leaderboardBtn.addEventListener('click', () => {
   updateLeaderboard();
   startPage.classList.remove('visible');
   leaderboard.classList.add('visible');
   leaderboard.setAttribute('aria-hidden', 'false');
-
-  // Hide back to menu while leaderboard is open
   backToMenuBtn.style.display = 'none';
-
   trapFocus(leaderboard);
 });
+
+submitNameBtn.addEventListener('click', () => {
+  const val = nameInput.value.trim();
+  if (!val) {
+    alert("Please enter a name");
+    nameInput.focus();
+    return;
+  }
+
+
+  playerName = val;
+  localStorage.setItem("snakePlayerName", playerName);
+
+  namePopup.classList.add('hidden');
+  startPage.classList.add('visible');
+  gameContainer.setAttribute('aria-hidden', 'true');
+
+  trapFocus(startPage);
+});
+
+
 
 closeLeaderboardBtn.addEventListener('click', () => {
   leaderboard.classList.remove('visible');
@@ -219,7 +249,7 @@ closeLeaderboardBtn.addEventListener('click', () => {
       return;
     }
     playerName = newName;
-    localStorage.setItem('snakePlayerName', playerName);
+    
     alert('Name changed to: ' + playerName);
   });
 
@@ -242,15 +272,7 @@ backToMenuBtn.addEventListener('click', () => {
 });
 
 // When opening settings, hide the back-to-menu button
-settingsBtn.addEventListener('click', () => {
-  settings.classList.add('visible');
-  settings.setAttribute('aria-hidden', 'false');
 
-  // Hide back to menu while in settings
-  backToMenuBtn.style.display = 'none';
-
-  trapFocus(settings);
-});
 
 
   function randomPosition() {
@@ -285,6 +307,7 @@ settingsBtn.addEventListener('click', () => {
     moveProgress = 0;
     lastHeadPos = { x: 9, y: 9 };
     nextHeadPos = { x: 9, y: 9 };
+     scoreSubmitted = false; 
     placeFood();
     scoreEl.textContent = score;
     speedEl.textContent = speedLevel;
@@ -395,10 +418,7 @@ settingsBtn.addEventListener('click', () => {
 
     if (positionsEqual(newHead, food)) {
       score++;
-      if(score > highestScore){
-        highestScore = score;
-        localStorage.setItem('snakeHighestScore', highestScore);
-      }
+      
       scoreEl.textContent = score;
 
       if (score % speedIncrementScoreStep === 0 && speedLevel < maxSpeedLevel) {
@@ -526,11 +546,18 @@ document.addEventListener(
     }
   }
 
-  function endGame() {
-    gameOver = true;
-    gameOverScore.textContent = "Your Score: " + score;
-    gameOverScreen.classList.add('visible');
+function endGame() {
+  gameOver = true;
+  gameOverScore.textContent = "Your Score: " + score;
+  gameOverScreen.classList.add('visible');
+
+  if (!scoreSubmitted) {
+    submitScore(playerName, score);
+    scoreSubmitted = true;
   }
+}
+
+
 
   restartBtn.addEventListener('click', () => {
     resetGame();
@@ -553,5 +580,4 @@ document.addEventListener(
     gameContainer.setAttribute('aria-hidden', 'true');
   }
 })();
-
 
