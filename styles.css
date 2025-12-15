@@ -434,11 +434,16 @@ canvas {
   background-color: #141e37;
 }
 /* 🔒 Disable pull-to-refresh & scroll */
+/* ✅ Page-level: UI friendly */
 html, body {
-  overscroll-behavior: none;
-  touch-action: none;
+  overscroll-behavior-y: contain; /* stops pull-to-refresh mostly */
   height: 100%;
   overflow: hidden;
+}
+
+/* ✅ Game-only: strict control */
+#game-container {
+  touch-action: none;
 }
 
 /* Allow UI buttons to still work */

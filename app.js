@@ -5,34 +5,24 @@
 let playerName = localStorage.getItem("snakePlayerName") || "";
 let playerSkinColor = localStorage.getItem("snakeSkinColor") || "#4b8bf5";
 let scoreSubmitted = false;
+let isGameActive = false;
 
-let lastTouchYGlobal = 0;
 
 // Stop pull-to-refresh & swipe navigation
-document.addEventListener(
-  "touchstart",
-  (e) => {
-    if (e.touches.length === 1) {
-      lastTouchYGlobal = e.touches[0].clientY;
-    }
-  },
-  { passive: false }
-);
+
+let blockScroll = false;
 
 document.addEventListener(
   "touchmove",
   (e) => {
-    const currentY = e.touches[0].clientY;
-
-    // 🔥 prevent downward pull (refresh)
-    if (currentY > lastTouchYGlobal) {
-      e.preventDefault();
+    if (blockScroll) {
+      e.preventDefault(); // 🔒 NO REFRESH
     }
-
-    lastTouchYGlobal = currentY;
   },
   { passive: false }
 );
+
+
 
   const namePopup = document.getElementById('name-popup');
   const nameInput = document.getElementById('name-input');
@@ -186,6 +176,8 @@ async function submitScore(name, score) {
   }
 startBtn.addEventListener('click', () => {
   startPage.classList.remove('visible');
+  isGameActive = true;
+  blockScroll = true;
   gameContainer.setAttribute('aria-hidden', 'false');
   resetGame();
   gameLoop();
@@ -264,12 +256,7 @@ closeLeaderboardBtn.addEventListener('click', () => {
   trapFocus(startPage);
 });
 
-backToMenuBtn.addEventListener('click', () => {
-  gameOver = true;
-  gameContainer.setAttribute('aria-hidden', 'true');
-  startPage.classList.add('visible');
-  trapFocus(startPage);
-});
+
 
 // When opening settings, hide the back-to-menu button
 
@@ -473,8 +460,54 @@ backToMenuBtn.addEventListener('click', () => {
     draw(t);
     if(!gameOver) window.requestAnimationFrame(gameLoop);
   }
+/* ===============================
+📱 MOBILE SWIPE CONTROLS
+(ONLY ON GAME CANVAS)
+================================ */
+
+canvas.addEventListener(
+  "touchstart",
+  (e) => {
+    if (!isGameActive) return;
+    if (e.touches.length !== 1) return;
+
+    const t = e.touches[0];
+    touchStartX = t.clientX;
+    touchStartY = t.clientY;
+  },
+  { passive: true }
+);
+
+canvas.addEventListener(
+  "touchend",
+  (e) => {
+    if (!isGameActive || gameOver) return;
+    if (touchStartX === null || touchStartY === null) return;
+
+    const t = e.changedTouches[0];
+    const dx = t.clientX - touchStartX;
+    const dy = t.clientY - touchStartY;
+
+    if (Math.abs(dx) > Math.abs(dy)) {
+      if (dx > minSwipeDist && direction !== DIRS.LEFT)
+        nextDirection = DIRS.RIGHT;
+      else if (dx < -minSwipeDist && direction !== DIRS.RIGHT)
+        nextDirection = DIRS.LEFT;
+    } else {
+      if (dy > minSwipeDist && direction !== DIRS.UP)
+        nextDirection = DIRS.DOWN;
+      else if (dy < -minSwipeDist && direction !== DIRS.DOWN)
+        nextDirection = DIRS.UP;
+    }
+
+    touchStartX = null;
+    touchStartY = null;
+  },
+  { passive: true }
+);
 
   window.addEventListener('keydown', e => {
+    
     if (gameOver) return;
     switch(e.key) {
       case 'ArrowUp': case 'w': case 'W':
@@ -492,49 +525,9 @@ backToMenuBtn.addEventListener('click', () => {
     }
   });
 
-document.addEventListener(
-  'touchstart',
-  e => {
-    if (e.touches.length === 1) {
-      touchStartX = e.touches[0].clientX;
-      touchStartY = e.touches[0].clientY;
-    }
-    e.preventDefault(); // 🔥 BLOCK SCROLL
-  },
-  { passive: false }
-);
 
 
-document.addEventListener(
-  'touchend',
-  e => {
-    if (gameOver) return;
-    if (touchStartX === null || touchStartY === null) return;
 
-    let touchEndX = e.changedTouches[0].clientX;
-    let touchEndY = e.changedTouches[0].clientY;
-
-    let dx = touchEndX - touchStartX;
-    let dy = touchEndY - touchStartY;
-
-    if (Math.abs(dx) > Math.abs(dy)) {
-      if (dx > minSwipeDist && direction !== DIRS.LEFT)
-        nextDirection = DIRS.RIGHT;
-      else if (dx < -minSwipeDist && direction !== DIRS.RIGHT)
-        nextDirection = DIRS.LEFT;
-    } else {
-      if (dy > minSwipeDist && direction !== DIRS.UP)
-        nextDirection = DIRS.DOWN;
-      else if (dy < -minSwipeDist && direction !== DIRS.DOWN)
-        nextDirection = DIRS.UP;
-    }
-
-    touchStartX = null;
-    touchStartY = null;
-    e.preventDefault(); // 🔥 STOP BROWSER ACTION
-  },
-  { passive: false }
-);
 
 
 
@@ -547,7 +540,10 @@ document.addEventListener(
   }
 
 function endGame() {
+  blockScroll = false; // 🔓 scroll wapas normal
+
   gameOver = true;
+  isGameActive = false;
   gameOverScore.textContent = "Your Score: " + score;
   gameOverScreen.classList.add('visible');
 
@@ -569,6 +565,9 @@ function endGame() {
     gameContainer.setAttribute('aria-hidden', 'true');
     startPage.classList.add('visible');
     trapFocus(startPage);
+    blockScroll = false;
+    
+
   });
   
   if(playerName) {
@@ -579,5 +578,50 @@ function endGame() {
     startPage.classList.remove('visible');
     gameContainer.setAttribute('aria-hidden', 'true');
   }
+  /* ===============================
+📱 FULL SCREEN SWIPE CONTROLS
+================================ */
+
+document.addEventListener(
+  "touchstart",
+  (e) => {
+    if (!isGameActive) return;
+    if (e.touches.length !== 1) return;
+
+    const t = e.touches[0];
+    touchStartX = t.clientX;
+    touchStartY = t.clientY;
+  },
+  { passive: true }
+);
+
+document.addEventListener(
+  "touchend",
+  (e) => {
+    if (!isGameActive || gameOver) return;
+    if (touchStartX === null || touchStartY === null) return;
+
+    const t = e.changedTouches[0];
+    const dx = t.clientX - touchStartX;
+    const dy = t.clientY - touchStartY;
+
+    if (Math.abs(dx) > Math.abs(dy)) {
+      if (dx > minSwipeDist && direction !== DIRS.LEFT)
+        nextDirection = DIRS.RIGHT;
+      else if (dx < -minSwipeDist && direction !== DIRS.RIGHT)
+        nextDirection = DIRS.LEFT;
+    } else {
+      if (dy > minSwipeDist && direction !== DIRS.UP)
+        nextDirection = DIRS.DOWN;
+      else if (dy < -minSwipeDist && direction !== DIRS.DOWN)
+        nextDirection = DIRS.UP;
+    }
+
+    touchStartX = null;
+    touchStartY = null;
+  },
+  { passive: true }
+);
+
 })();
 
