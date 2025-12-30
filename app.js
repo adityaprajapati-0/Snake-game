@@ -165,6 +165,15 @@ return;
 
 
 
+function trophySVG(type) {
+  return `
+    <svg class="trophy ${type}" viewBox="0 0 64 64">
+      <path d="M16 8h32v10c0 10-8 18-16 18S16 28 16 18V8z"/>
+      <rect x="26" y="36" width="12" height="8"/>
+      <rect x="22" y="44" width="20" height="6"/>
+    </svg>
+  `;
+}
 
 
  async function updateLeaderboard() {
@@ -176,11 +185,23 @@ return;
 
     leaderboardList.innerHTML = "";
 
-    data.forEach((row, i) => {
-      const li = document.createElement("li");
-      li.textContent = `${i + 1}. ${row.name} — ${row.score}`;
-      leaderboardList.appendChild(li);
-    });
+   data.forEach((row, i) => {
+  const li = document.createElement("li");
+
+  let trophy = "";
+  if (i === 0) trophy = trophySVG("gold");
+  else if (i === 1) trophy = trophySVG("silver");
+  else if (i === 2) trophy = trophySVG("bronze");
+
+  li.innerHTML = `
+    <div class="lb-row">
+      <div>${trophy}${i + 1}. ${row.name}</div>
+      <b>${row.score}</b>
+    </div>
+  `;
+  leaderboardList.appendChild(li);
+});
+
   } catch (err) {
     leaderboardList.innerHTML = "Failed to load leaderboard";
     console.error(err);
@@ -234,7 +255,6 @@ leaderboardBtn.addEventListener('click', () => {
   leaderboard.classList.add('visible');
   leaderboard.setAttribute('aria-hidden', 'false');
   backToMenuBtn.style.display = 'none';
-  trapFocus(leaderboard);
 });
 
 submitNameBtn.addEventListener('click', () => {
@@ -258,38 +278,60 @@ submitNameBtn.addEventListener('click', () => {
 
 
 
-closeLeaderboardBtn.addEventListener('click', () => {
+closeLeaderboardBtn.addEventListener('click', (e) => {
+  e.stopPropagation(); // ✅ IMPORTANT
   leaderboard.classList.remove('visible');
   leaderboard.setAttribute('aria-hidden', 'true');
-
-  // Show back to menu again
   backToMenuBtn.style.display = 'block';
-
   startPage.classList.add('visible');
-  trapFocus(startPage);
+});
+
+// ✅ CLICK OUTSIDE TO CLOSE LEADERBOARD
+leaderboard.addEventListener("click", () => {
+  leaderboard.classList.remove("visible");
+  leaderboard.setAttribute("aria-hidden", "true");
+  startPage.classList.add("visible");
+});
+
+// ❌ INSIDE CLICK = DON’T CLOSE
+leaderboardList.addEventListener("click", (e) => {
+  e.stopPropagation();
 });
 
 
-  settingsBtn.addEventListener('click', () => {
-    nameChangeInput.value = playerName;
-    renderSkinColors();
-    startPage.classList.remove('visible');
-    settings.classList.add('visible');
-    settings.setAttribute('aria-hidden', 'false');
-    trapFocus(settings);
-  });
+ settingsBtn.addEventListener('click', () => {
+  nameChangeInput.value = playerName;
+  renderSkinColors();
+  startPage.classList.remove('visible');
+  settings.classList.add('visible');
+  settings.setAttribute('aria-hidden', 'false');
+  backToMenuBtn.style.display = 'none'; // ✅ ADD THIS
+});
 
 
- closeSettingsBtn.addEventListener('click', () => {
+
+
+ closeSettingsBtn.addEventListener('click', (e) => {
+  e.stopPropagation(); // ✅ IMPORTANT
   settings.classList.remove('visible');
   settings.setAttribute('aria-hidden', 'true');
-
-  // Show back to menu again
   backToMenuBtn.style.display = 'block';
-
   startPage.classList.add('visible');
-  trapFocus(startPage);
 });
+
+// ✅ CLICK OUTSIDE TO CLOSE SETTINGS
+settings.addEventListener("click", () => {
+  settings.classList.remove("visible");
+  settings.setAttribute("aria-hidden", "true");
+  startPage.classList.add("visible");
+});
+
+// ❌ INSIDE CLICK = DON’T CLOSE
+// ❌ INSIDE SETTINGS CLICK = DON’T CLOSE
+Array.from(settings.children).forEach(child => {
+  child.addEventListener("click", e => e.stopPropagation());
+});
+
 
 
 
@@ -671,9 +713,13 @@ function showEmptyNameToast() {
 
 
   restartBtn.addEventListener('click', () => {
-    resetGame();
-    gameLoop();
-  });
+  isGameActive = true;   // ✅ RE-ENABLE CONTROLS
+  blockScroll = true;   // ✅ prevent pull-to-refresh again
+  resetGame();
+  gameLoop();
+  canvas.focus();
+});
+
 
   backToMenuBtn.addEventListener('click', () => {
     gameOver = true;

@@ -670,3 +670,35 @@ button, input {
     opacity: 1;
   }
 }
+.lb-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.trophy {
+  width: 22px;
+  height: 22px;
+  margin-right: 6px;
+  animation: float 2s ease-in-out infinite;
+}
+
+.gold {
+  fill: gold;
+  filter: drop-shadow(0 0 6px gold);
+}
+
+.silver {
+  fill: silver;
+  filter: drop-shadow(0 0 6px silver);
+}
+
+.bronze {
+  fill: #cd7f32;
+  filter: drop-shadow(0 0 6px #cd7f32);
+}
+
+@keyframes float {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
