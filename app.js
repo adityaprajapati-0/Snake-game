@@ -194,12 +194,25 @@ function trophySVG(type) {
   else if (i === 2) trophy = trophySVG("bronze");
 
   li.innerHTML = `
-    <div class="lb-row">
-      <div>${trophy}${i + 1}. ${row.name}</div>
-      <b>${row.score}</b>
+  <div class="lb-row">
+    
+    <div class="trophy-wrap">
+      ${trophy}
     </div>
-  `;
-  leaderboardList.appendChild(li);
+
+    <div class="lb-left">
+      <span class="rank">${i + 1}.</span>
+      <span class="name">${row.name}</span>
+    </div>
+
+    <div class="lb-score">
+      ${row.score}
+    </div>
+
+  </div>
+`;
+leaderboardList.appendChild(li);
+
 });
 
   } catch (err) {
